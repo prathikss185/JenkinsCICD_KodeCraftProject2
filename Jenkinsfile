@@ -1,13 +1,13 @@
 pipeline {
     agent any
     environment {
-        registry = "288214676350.dkr.ecr.ap-south-1.amazonaws.com/myecrrepo"
+        registry = "287489840086.dkr.ecr.ap-southeast-1.amazonaws.com/private_ecr_repo"
         dockerImageTag = "${env.BUILD_NUMBER}"
     }
     stages {
         stage('Code Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github', url: 'https://github.com/peddiredds/jenkinscicd.git']])
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'GITHUB_TOKEN', url: 'https://github.com/venugopalsgnew/JenkinsCICD_Legro.git']])
             }
         }
         stage('Build and Test') {
@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Static Code Analysis') {
         environment {
-            SONAR_URL = "http://3.109.186.70:9000"
+            SONAR_URL = "http://18.141.229.108:9000"
               }
          steps {
              withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_AUTH_TOKEN')]) {
@@ -38,37 +38,38 @@ pipeline {
             steps {
                 script {
 
-                    sh 'aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 288214676350.dkr.ecr.ap-south-1.amazonaws.com'
+                    sh 'aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 287489840086.dkr.ecr.ap-southeast-1.amazonaws.com'
                     sh "docker push ${registry}:${dockerImageTag}"
                 }
             }
         }
         stage('Update Helm Chart') {
             environment {
-               GIT_REPO_NAME = "peddiredds/argocd.git"
-               GIT_USER_NAME = "peddiredds"
-               helmChartPath = "argocd/charts/myapp"
+               GIT_REPO_NAME = "venugopalsgnew/ArgoCD_Legro.git"
+               GIT_USER_NAME = "venugopalsgnew"
+               helmChartPath = "ArgoCD_Legro/charts/myapp"
              }
             steps {
                 withCredentials([string(credentialsId: 'git-credentials-id', variable: 'GITHUB_TOKEN')]) {
                     sh'''
-                      git config user.email "srinivasreddy.skim@gmail.com"
-                      git config user.name "srinivas"
-                      rm -rf argocd
+                      git config user.email "venugopal.aix@gmail.com"
+                      git config user.name "venu"
+                      rm -rf ArgoCD_Legro
                       git clone https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME}
-                      cd argocd
+                      cd ArgoCD_Legro
                       git pull
                       cd ..
                       sed -i "s/dockerImageTag: .*/dockerImageTag: \"${dockerImageTag}\"/" ${helmChartPath}/values.yaml
-                      cd argocd
+                      cd ArgoCD_Legro
                       pwd
                       git add charts/myapp/values.yaml
                       git commit -m "Update image tag in values.yaml"
-                      git push https://${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME} HEAD:main
+                      git push https://${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME} HEAD:master
                  '''
         }
     }
-}
+    }
+    
 
     }
 }
