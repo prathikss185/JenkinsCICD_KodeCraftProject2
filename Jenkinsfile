@@ -1,13 +1,13 @@
 pipeline {
     agent any
     environment {
-        registry = "287489840086.dkr.ecr.ap-southeast-1.amazonaws.com/private_ecr_repo"
+        registry = "287489840086.dkr.ecr.ap-southeast-1.amazonaws.com/myecr"
         dockerImageTag = "${env.BUILD_NUMBER}"
     }
     stages {
         stage('Code Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'GITHUB_TOKEN', url: 'https://github.com/venugopalsgnew/JenkinsCICD_Legro.git']])
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token-jenkins', url: 'https://github.com/venugopalsgnew/JenkinsCICD_Legro.git']])
             }
         }
         stage('Build and Test') {
@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Static Code Analysis') {
         environment {
-            SONAR_URL = "http://18.141.229.108:9000"
+            SONAR_URL = "http://54.255.187.170:9000"
               }
          steps {
              withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_AUTH_TOKEN')]) {
