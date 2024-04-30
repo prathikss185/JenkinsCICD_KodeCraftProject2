@@ -52,10 +52,10 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'git-credentials-id', variable: 'GITHUB_TOKEN')]) {
                     sh'''
-                      git config user.email "venugopal.aix@gmail.com"
-                      git config user.name "venu"
                       rm -rf ArgoCD_Legro
                       git clone https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME}
+                      git config --global user.email "venugopal.aix@gmail.com"
+                      git config --global user.name "venu"
                       cd ArgoCD_Legro
                       git pull
                       cd ..
