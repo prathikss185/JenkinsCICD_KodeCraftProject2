@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Code Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token-jenkins', url: 'https://github.com/venugopalsgnew/JenkinsCICD_Legro.git']])
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token-jenkins', url: 'https://github.com/venugopalsgnew/JenkinsCICD_KodeCraft.git']])
             }
         }
         stage('Build and Test') {
