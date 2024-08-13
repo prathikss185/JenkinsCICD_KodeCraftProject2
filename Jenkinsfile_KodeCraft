@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven'
+    }
+    environment {
+        registry = "287489840086.dkr.ecr.ap-southeast-1.amazonaws.com/myecr"
+        dockerImageTag = "${env.BUILD_NUMBER}"
+    }
+    stages {
+        stage('Code Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token-jenkins', url: 'https://github.com/venugopalsgnew/JenkinsCICD_KodeCraft.git']])
+            }
+        }
+        stage('Build and Test') {
+            steps {
+               sh 'ls -ltr'
+               sh 'mvn clean package'
+            }
+        }
+        stage('Static Code Analysis') {
+        environment {
+            SONAR_URL = "http://54.255.69.208:9000"
+              }
+         steps {
+             withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_AUTH_TOKEN')]) {
+               sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+            }
+           }
+        }
+
+        stage('Building image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${registry}:${dockerImageTag}")
+                }
+            }
+        }
+        stage('Pushing to ECR') {
+            steps {
+                script {
+
+                    sh 'aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 287489840086.dkr.ecr.ap-southeast-1.amazonaws.com'
+                    sh "docker push ${registry}:${dockerImageTag}"
+                }
+            }
+        }
+        stage('Update Helm Chart') {
+            environment {
+               GIT_REPO_NAME = "venugopalsgnew/ArgoCD_Legro.git"
+               GIT_USER_NAME = "venugopalsgnew"
+               helmChartPath = "ArgoCD_Legro/charts/myapp"
+             }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-token-jenkins',
+                                                   usernameVariable: 'GITHUB_USER',
+                                                   passwordVariable: 'GITHUB_TOKEN')]) {
+                    sh'''
+                      rm -rf ArgoCD_Legro
+                      git clone https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME}
+                      git config --global user.email "venugopal.aix@gmail.com"
+                      git config --global user.name "venu"
+                      cd ArgoCD_Legro
+                      git pull
+                      cd ..
+                      sed -i "s/dockerImageTag: .*/dockerImageTag: \"${dockerImageTag}\"/" ${helmChartPath}/values.yaml
+                      cd ArgoCD_Legro
+                      pwd
+                      git add charts/myapp/values.yaml
+                      git commit -m "Update image tag in values.yaml"
+                      git push https://${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME} HEAD:master
+                 '''
+        }
+    }
+    }
+    
+
+    }
+}
