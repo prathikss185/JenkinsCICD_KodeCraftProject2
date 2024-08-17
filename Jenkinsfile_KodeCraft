@@ -21,7 +21,7 @@ pipeline {
         }
         stage('Static Code Analysis') {
         environment {
-            SONAR_URL = "http://54.255.69.208:9000"
+            SONAR_URL = "http://18.143.169.88:9000"
               }
          steps {
              withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_AUTH_TOKEN')]) {
@@ -48,7 +48,7 @@ pipeline {
         }
         stage('Update Helm Chart') {
             environment {
-               GIT_REPO_NAME = "venugopalsgnew/ArgoCD_Legro.git"
+               GIT_REPO_NAME = "venugopalsgnew/ArgoCD_Demo.git"
                GIT_USER_NAME = "venugopalsgnew"
                helmChartPath = "ArgoCD_Legro/charts/myapp"
              }
