@@ -13,8 +13,8 @@ public class StartApplication {
     @GetMapping("/")
     public String index(final Model model) {
         model.addAttribute("title", "I have successfully built a Spring Boot application using Maven");
-        model.addAttribute("msg", "This application is deployed onto Kubernetes using Jenkins and Argo CD. "
-                                + "Congratulations !!! You Did it");
+        model.addAttribute("msg1", "This application is deployed onto Kubernetes using Jenkins and Argo CD.");
+        model.addAttribute("msg2", "Congratulations !!! You Did it");    
         return "index";
     }
 
