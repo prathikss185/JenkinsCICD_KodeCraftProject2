@@ -4,13 +4,13 @@ pipeline {
         maven 'Maven'
     }
     environment {
-        registry = "287489840086.dkr.ecr.ap-southeast-1.amazonaws.com/myecr"
+        registry = "585008051018.dkr.ecr.us-east-2.amazonaws.com/welcomemore/welcomemore123"
         dockerImageTag = "${env.BUILD_NUMBER}"
     }
     stages {
         stage('Code Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token-jenkins', url: 'https://github.com/venugopalsgnew/JenkinsCICD_KodeCraft.git']])
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'git_hub', url: 'https://github.com/prathikss185/JenkinsCICD_KodeCraftProject2.git']])
             }
         }
         stage('Build and Test') {
@@ -21,10 +21,10 @@ pipeline {
         }
         stage('Static Code Analysis') {
         environment {
-            SONAR_URL = "http://18.143.169.88:9000"
+            SONAR_URL = "http://3.144.182.245/:9000"
               }
          steps {
-             withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_AUTH_TOKEN')]) {
+             withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_AUTH_TOKEN')]) {
                sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
             }
            }
@@ -41,31 +41,31 @@ pipeline {
             steps {
                 script {
 
-                    sh 'aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 287489840086.dkr.ecr.ap-southeast-1.amazonaws.com'
+                    sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 585008051018.dkr.ecr.us-east-2.amazonaws.com'
                     sh "docker push ${registry}:${dockerImageTag}"
                 }
             }
         }
         stage('Update Helm Chart') {
             environment {
-               GIT_REPO_NAME = "venugopalsgnew/ArgoCD_Demo.git"
-               GIT_USER_NAME = "venugopalsgnew"
-               helmChartPath = "ArgoCD_Legro/charts/myapp"
+               GIT_REPO_NAME = "prathikss185/ArgoCD_DemoProejct2.git"
+               GIT_USER_NAME = "prathikss185"
+               helmChartPath = "ArgoCD_Demo/charts/myapp"
              }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-token-jenkins',
+                withCredentials([usernamePassword(credentialsId: 'git_hub',
                                                    usernameVariable: 'GITHUB_USER',
                                                    passwordVariable: 'GITHUB_TOKEN')]) {
                     sh'''
-                      rm -rf ArgoCD_Legro
+                      rm -rf ArgoCD_Demo
                       git clone https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME}
-                      git config --global user.email "venugopal.aix@gmail.com"
-                      git config --global user.name "venu"
-                      cd ArgoCD_Legro
+                      git config --global user.email "prathikss185@gmail.com"
+                      git config --global user.name "prathikss185"
+                      cd ArgoCD_Demo
                       git pull
                       cd ..
                       sed -i "s/dockerImageTag: .*/dockerImageTag: \"${dockerImageTag}\"/" ${helmChartPath}/values.yaml
-                      cd ArgoCD_Legro
+                      cd ArgoCD_Demo
                       pwd
                       git add charts/myapp/values.yaml
                       git commit -m "Update image tag in values.yaml"
