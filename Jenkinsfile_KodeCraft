@@ -57,15 +57,15 @@ pipeline {
                                                    usernameVariable: 'GITHUB_USER',
                                                    passwordVariable: 'GITHUB_TOKEN')]) {
                     sh'''
-                      rm -rf ArgoCD_Demo
+                      rm -rf ArgoCD_DemoProejct2
                       git clone https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_REPO_NAME}
                       git config --global user.email "prathikss185@gmail.com"
                       git config --global user.name "prathikss185"
-                      cd ArgoCD_Demo
+                      cd ArgoCD_DemoProejct2
                       git pull
                       cd ..
                       sed -i "s/dockerImageTag: .*/dockerImageTag: \"${dockerImageTag}\"/" ${helmChartPath}/values.yaml
-                      cd ArgoCD_Demo
+                      cd ArgoCD_DemoProejct2
                       pwd
                       git add charts/myapp/values.yaml
                       git commit -m "Update image tag in values.yaml"
