@@ -50,7 +50,7 @@ pipeline {
             environment {
                GIT_REPO_NAME = "prathikss185/ArgoCD_DemoProejct2.git"
                GIT_USER_NAME = "prathikss185"
-               helmChartPath = "ArgoCD_Demo/charts/myapp"
+               helmChartPath = "ArgoCD_DemoProejct2/charts/myapp"
              }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'git_hub',
